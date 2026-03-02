@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  bookings  Booking[]
+  createdAt DateTime @default(now())
+}
+
+model Cinema {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  studios   Studio[]
+  createdAt DateTime @default(now())
+}
+
+model Studio {
+  id        String   @id @default(uuid())
+  name      String
+  cinema    Cinema   @relation(fields: [cinemaId], references: [id])
+  cinemaId  String
+  seats     Seat[]
+  showtimes Showtime[]
+  createdAt DateTime @default(now())
+}
+
+model Seat {
+  id        String   @id @default(uuid())
+  number    String   // contoh: A1, A2
+  studio    Studio   @relation(fields: [studioId], references: [id])
+  studioId  String
+  bookings  BookingSeat[]
+  createdAt DateTime @default(now())
+
+  @@unique([studioId, number])
+}
+
+model Movie {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  duration    Int        // dalam menit
+  posterUrl   String?
+  showtimes   Showtime[]
+  createdAt   DateTime   @default(now())
+}
+
+model Showtime {
+  id        String   @id @default(uuid())
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  movieId   String
+  studio    Studio   @relation(fields: [studioId], references: [id])
+  studioId  String
+  startTime DateTime
+  bookings  Booking[]
+  seats     BookingSeat[]
+  createdAt DateTime @default(now())
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  user       User          @relation(fields: [userId], references: [id])
+  userId     String
+  showtime   Showtime      @relation(fields: [showtimeId], references: [id])
+  showtimeId String
+  status     BookingStatus @default(PENDING)
+  expiresAt  DateTime
+  seats      BookingSeat[]
+  createdAt  DateTime      @default(now())
+}
+
+model BookingSeat {
+  id         String   @id @default(uuid())
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+  bookingId  String
+  showtime   Showtime @relation(fields: [showtimeId], references: [id])
+  showtimeId String
+  seat       Seat     @relation(fields: [seatId], references: [id])
+  seatId     String
+  createdAt  DateTime @default(now())
+
+  @@unique([showtimeId, seatId])
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum BookingStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
