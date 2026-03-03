@@ -8,9 +8,9 @@ function successResponse(res, { message, data = null, code = 200, meta }) {
   })
 }
 
-function errorResponse(res, message = 'Internal server error', data = null, status = 500) {
-  return res.status(status).json({
-    code: status,
+function errorResponse(res, { message = 'Internal server error', data = null, code = 500 }) {
+  return res.status(code).json({
+    code,
     success: false,
     message,
     data
