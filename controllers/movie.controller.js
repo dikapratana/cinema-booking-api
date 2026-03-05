@@ -46,3 +46,48 @@ exports.create = async (req, res) => {
     })
   }
 }
+
+exports.detail = async (req, res) => {
+  try {
+    const movie = await movieService.detailMovie(req.validated?.params)
+    if (!movie) {
+      return errorResponse(res, {
+        message: 'Movie not found',
+        code: 404
+      })
+    }
+    return successResponse(res, {
+      message: 'Success get movie detail',
+      data: {
+        ...movie,
+        posterUrl: withHostname(req, movie.posterUrl)
+      }
+    })
+  } catch (error) {
+    return errorResponse(res, {
+      message: error?.message || 'Internal server error',
+      code: 500
+    })
+  }
+}
+
+exports.update = async (req, res) => {
+  try {
+    const movie = await movieService.updateMovie(req.validated?.params, req.validated?.body)
+    if (!movie) {
+      return errorResponse(res, {
+        message: 'Movie not found',
+        code: 404
+      })
+    }
+    return successResponse(res, {
+      message: 'Success update movie',
+      data: movie
+    })
+  } catch (error) {
+    return errorResponse(res, {
+      message: error?.message || 'Internal server error',
+      code: 500
+    })
+  }
+}

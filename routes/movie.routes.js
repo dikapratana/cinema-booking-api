@@ -6,6 +6,12 @@ const movieValidation = require('../validations/movie.validation')
 const validationMiddleware = require('../middleware/validate.middleware')
 const { uploadPoster } = require('../middleware/upload.middleware')
 
+router.get(
+  '/',
+  validationMiddleware(movieValidation.getAllMoviesQuerySchema, 'query'),
+  movieController.findAll
+)
+
 router.post(
   '/',
   uploadPoster,
@@ -14,9 +20,16 @@ router.post(
 )
 
 router.get(
-  '/',
-  validationMiddleware(movieValidation.getAllMoviesQuerySchema, 'query'),
-  movieController.findAll
+  '/:id',
+  validationMiddleware(movieValidation.detailMovieSchema, 'params'),
+  movieController.detail
+)
+
+router.put('/:id',
+  uploadPoster,
+  validationMiddleware(movieValidation.updateMovieParamSchema, 'params'),
+  validationMiddleware(movieValidation.updateMovieSchema),
+  movieController.update
 )
 
 module.exports = router
