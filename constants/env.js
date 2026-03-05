@@ -1,0 +1,9 @@
+const JWT_SECRET = process.env.JWT_SECRET
+const BASIC_AUTH_USERNAME = process.env.BASIC_AUTH_USERNAME
+const BASIC_AUTH_PASSWORD = process.env.BASIC_AUTH_PASSWORD
+
+module.exports = {
+  JWT_SECRET,
+  BASIC_AUTH_USERNAME,
+  BASIC_AUTH_PASSWORD
+}
