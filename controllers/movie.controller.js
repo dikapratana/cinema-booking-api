@@ -91,3 +91,23 @@ exports.update = async (req, res) => {
     })
   }
 }
+
+exports.delete = async (req, res) => {
+  try {
+    const result = await movieService.deleteMovie(req.validated?.params)
+    if (!result) {
+      return errorResponse(res, {
+        message: 'Movie not found',
+        code: 404
+      })
+    }
+    return successResponse(res, {
+      message: 'Success delete movie'
+    })
+  } catch (error) {
+    return errorResponse(res, {
+      message: error?.message || 'Internal server error',
+      code: 500
+    })
+  }
+}

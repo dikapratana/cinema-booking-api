@@ -21,15 +21,21 @@ router.post(
 
 router.get(
   '/:id',
-  validationMiddleware(movieValidation.detailMovieSchema, 'params'),
+  validationMiddleware(movieValidation.movieIdParamSchema, 'params'),
   movieController.detail
 )
 
 router.put('/:id',
   uploadPoster,
-  validationMiddleware(movieValidation.updateMovieParamSchema, 'params'),
+  validationMiddleware(movieValidation.movieIdParamSchema, 'params'),
   validationMiddleware(movieValidation.updateMovieSchema),
   movieController.update
+)
+
+router.delete(
+  '/:id',
+  validationMiddleware(movieValidation.movieIdParamSchema, 'params'),
+  movieController.delete
 )
 
 module.exports = router

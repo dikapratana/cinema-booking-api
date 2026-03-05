@@ -83,10 +83,6 @@ const movieIdParamSchema = z.object({
     }, 'id is required')
 }).strict()
 
-const detailMovieSchema = movieIdParamSchema
-
-const updateMovieParamSchema = movieIdParamSchema
-
 const updateMovieSchema = z.object({
   title: z
     .string({
@@ -96,7 +92,8 @@ const updateMovieSchema = z.object({
           : 'title must be a string'
     })
     .trim()
-    .min(1, 'title is required'),
+    .min(1, 'title is required')
+    .optional(),
 
   description: z
     .string({
@@ -106,7 +103,8 @@ const updateMovieSchema = z.object({
           : 'description must be a string'
     })
     .trim()
-    .min(1, 'description is required'),
+    .min(1, 'description is required')
+    .optional(),
 
   duration: z
     .string({
@@ -116,7 +114,8 @@ const updateMovieSchema = z.object({
           : 'duration must be a string'
     })
     .regex(/^\d+$/, 'duration must be an integer')
-    .transform((val) => Number(val)),
+    .transform((val) => Number(val))
+    .optional(),
 
   posterUrl: z
     .string({
@@ -128,12 +127,12 @@ const updateMovieSchema = z.object({
     .trim()
     .min(1, 'posterUrl is required')
     .regex(/^\/uploads\/.+$/, 'posterUrl is invalid')
+    .optional()
 }).strict()
 
 module.exports = {
   getAllMoviesQuerySchema,
   createMovieSchema,
-  detailMovieSchema,
   updateMovieSchema,
-  updateMovieParamSchema
+  movieIdParamSchema
 }
