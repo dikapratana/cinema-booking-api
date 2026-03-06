@@ -1,28 +1,28 @@
 async function paginateQuery(model, { page, size, where = {}, orderBy = {} }) {
-  const skip = (page - 1) * size;
+  const skip = (page - 1) * size
 
   const [data, totalData] = await Promise.all([
     model.findMany({
       skip,
       take: size,
       where,
-      orderBy,
+      orderBy
     }),
-    model.count({ where }),
-  ]);
+    model.count({ where })
+  ])
 
-  const totalPages = Math.ceil(totalData / size);
+  const totalPage = Math.ceil(totalData / size)
 
   return {
     data,
     meta: {
       page,
       size,
-      totalPages,
+      totalPage,
       totalDataOnPage: data.length,
-      totalData,
-    },
-  };
+      totalData
+    }
+  }
 }
 
-module.exports = paginateQuery;
+module.exports = paginateQuery
