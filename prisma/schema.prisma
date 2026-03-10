@@ -32,6 +32,8 @@ model Studio {
   seats     Seat[]
   showtimes Showtime[]
   createdAt DateTime @default(now())
+
+  @@unique([cinemaId, name])
 }
 
 model Seat {

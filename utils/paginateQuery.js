@@ -1,4 +1,4 @@
-async function paginateQuery(model, { page, size, where = {}, orderBy = {} }) {
+async function paginateQuery(model, { page, size, where = {}, orderBy = {}, ...options }) {
   const skip = (page - 1) * size
 
   const [data, totalData] = await Promise.all([
@@ -6,7 +6,8 @@ async function paginateQuery(model, { page, size, where = {}, orderBy = {} }) {
       skip,
       take: size,
       where,
-      orderBy
+      orderBy,
+      ...options
     }),
     model.count({ where })
   ])
