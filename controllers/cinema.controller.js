@@ -55,7 +55,7 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const data = await cinemaService.deleteCinema(req?.validated?.params, req?.validated?.body)
+    const data = await cinemaService.deleteCinema(req?.validated?.params)
     if (!data) {
       return errorResponse(res, {
         message: 'Cinema not found',

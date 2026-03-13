@@ -88,7 +88,7 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const data = await seatService.deleteSeat(req?.validated?.params, req?.validated?.body)
+    const data = await seatService.deleteSeat(req?.validated?.params)
     if (!data) {
       return errorResponse(res, {
         message: 'Seat not found',

@@ -6,11 +6,13 @@ const authRoutes = require('./auth.routes')
 const cinemaRoutes = require('./cinema.route')
 const studioRoutes = require('./studio.routes')
 const seatRoutes = require('./seat.routes')
+const showTimeRoutes = require('./showtime.routes')
 
 router.use('/auth', authRoutes)
 router.use('/movies', movieRoutes)
 router.use('/cinemas', cinemaRoutes)
 router.use('/studios', studioRoutes)
 router.use('/seats', seatRoutes)
+router.use('/show-times', showTimeRoutes)
 
 module.exports = router
