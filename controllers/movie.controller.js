@@ -12,13 +12,15 @@ const withHostname = (req, posterUrl) => {
   return `${protocol}://${host}${posterUrl}`
 }
 
+const normalizeMoviePoster = (req, movie) => ({
+  ...movie,
+  posterUrl: withHostname(req, movie.posterUrl)
+})
+
 exports.findAll = async (req, res) => {
   try {
     const { data, meta } = await movieService.getAllMovies(req.validated?.query)
-    const normalizedData = data.map((movie) => ({
-      ...movie,
-      posterUrl: withHostname(req, movie.posterUrl)
-    }))
+    const normalizedData = data.map((movie) => normalizeMoviePoster(req, movie))
     return successResponse(res, {
       message: 'Success get movies',
       data: normalizedData,
@@ -37,7 +39,7 @@ exports.create = async (req, res) => {
     const movie = await movieService.createMovie(req.validated?.body)
     return successResponse(res, {
       message: 'Success create movie',
-      data: movie
+      data: normalizeMoviePoster(req, movie)
     })
   } catch (error) {
     return errorResponse(res, {
@@ -58,10 +60,7 @@ exports.detail = async (req, res) => {
     }
     return successResponse(res, {
       message: 'Success get movie detail',
-      data: {
-        ...movie,
-        posterUrl: withHostname(req, movie.posterUrl)
-      }
+      data: normalizeMoviePoster(req, movie)
     })
   } catch (error) {
     return errorResponse(res, {
@@ -82,7 +81,7 @@ exports.update = async (req, res) => {
     }
     return successResponse(res, {
       message: 'Success update movie',
-      data: movie
+      data: normalizeMoviePoster(req, movie)
     })
   } catch (error) {
     return errorResponse(res, {

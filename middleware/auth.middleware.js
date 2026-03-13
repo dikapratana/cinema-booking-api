@@ -1,5 +1,10 @@
 const jwt = require('jsonwebtoken')
 const { errorResponse } = require('../utils/response')
+const {
+  JWT_SECRET,
+  BASIC_AUTH_USERNAME,
+  BASIC_AUTH_PASSWORD
+} = require('../constants/env')
 
 function jwtAuth(req, res, next) {
   const authHeader = req.headers.authorization
@@ -16,7 +21,7 @@ function jwtAuth(req, res, next) {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET
+      JWT_SECRET
     )
 
     req.user = decoded
@@ -49,8 +54,8 @@ function basicAuth(req, res, next) {
   const [username, password] = credentials.split(':')
 
   if (
-    username !== process.env.BASIC_AUTH_USERNAME ||
-    password !== process.env.BASIC_AUTH_PASSWORD
+    username !== BASIC_AUTH_USERNAME ||
+    password !== BASIC_AUTH_PASSWORD
   ) {
     return errorResponse(res, {
       message: 'Invalid credentials',

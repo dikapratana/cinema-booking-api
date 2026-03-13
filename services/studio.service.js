@@ -24,13 +24,11 @@ async function createStudio(data) {
 }
 
 async function detailStudio(params) {
-  const result = await prisma.studio.findUnique({
+  return await prisma.studio.findUnique({
     where: {
       id: params?.id
     }
   })
-
-  return result
 }
 
 async function updateStudio(params, data) {
@@ -63,7 +61,7 @@ async function updateStudio(params, data) {
 async function deleteStudio(params) {
   const result = await prisma.studio.findUnique({
     where: {
-      id: params.id
+      id: params?.id
     }
   })
 
@@ -73,7 +71,7 @@ async function deleteStudio(params) {
 
   await prisma.studio.delete({
     where: {
-      id: params.id
+      id: params?.id
     }
   })
 

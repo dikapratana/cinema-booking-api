@@ -1,10 +1,28 @@
 const studioService = require('../services/studio.service')
 const { successResponse, errorResponse } = require('../utils/response')
 
+function handleStudioError(res, error) {
+  if (error?.code === 'P2002') {
+    return errorResponse(res, {
+      message: 'Studio name already exists in this cinema',
+      code: 409
+    })
+  }
+
+  if (error?.code === 'P2003') {
+    return errorResponse(res, {
+      message: 'Cinema not found',
+      code: 404
+    })
+  }
+
+  return errorResponse(res, { message: error?.message })
+}
+
 exports.get = async (req, res) => {
   try {
     const { data, meta } = await studioService.getStudio(req?.validated?.query)
-    return successResponse(res, { message: 'success get cinema', data, meta })
+    return successResponse(res, { message: 'Success get studios', data, meta })
   } catch (error) {
     return errorResponse(res, { message: error?.message })
   }
@@ -16,21 +34,7 @@ exports.create = async (req, res) => {
 
     return successResponse(res, { message: 'Success create studio', data: result })
   } catch (error) {
-    if (error?.code === 'P2002') {
-      return errorResponse(res, {
-        message: 'Studio name already exists in this cinema',
-        code: 409
-      })
-    }
-
-    if (error?.code === 'P2003') {
-      return errorResponse(res, {
-        message: 'Cinema not found',
-        code: 404
-      })
-    }
-
-    return errorResponse(res, { message: error?.message })
+    return handleStudioError(res, error)
   }
 }
 
@@ -70,19 +74,7 @@ exports.update = async (req, res) => {
       data
     })
   } catch (error) {
-    if (error?.code === 'P2002') {
-      return errorResponse(res, {
-        message: 'Studio name already exists in this cinema',
-        code: 409
-      })
-    }
-    if (error?.code === 'P2003') {
-      return errorResponse(res, {
-        message: 'Cinema not found',
-        code: 404
-      })
-    }
-    return errorResponse(res, { message: error?.message })
+    return handleStudioError(res, error)
   }
 }
 

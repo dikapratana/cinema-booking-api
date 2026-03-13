@@ -24,13 +24,11 @@ async function createSeat(data) {
 }
 
 async function detailSeat(params) {
-  const result = await prisma.seat.findUnique({
+  return await prisma.seat.findUnique({
     where: {
       id: params?.id
     }
   })
-
-  return result
 }
 
 async function updateSeat(params, data) {
@@ -63,7 +61,7 @@ async function updateSeat(params, data) {
 async function deleteSeat(params) {
   const result = await prisma.seat.findUnique({
     where: {
-      id: params.id
+      id: params?.id
     }
   })
 
@@ -73,7 +71,7 @@ async function deleteSeat(params) {
 
   await prisma.seat.delete({
     where: {
-      id: params.id
+      id: params?.id
     }
   })
 

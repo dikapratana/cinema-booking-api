@@ -1,10 +1,28 @@
 const seatService = require('../services/seat.service')
 const { successResponse, errorResponse } = require('../utils/response')
 
+function handleSeatError(res, error) {
+  if (error?.code === 'P2002') {
+    return errorResponse(res, {
+      message: 'Seat number already exists in this studio',
+      code: 409
+    })
+  }
+
+  if (error?.code === 'P2003') {
+    return errorResponse(res, {
+      message: 'Studio not found',
+      code: 404
+    })
+  }
+
+  return errorResponse(res, { message: error?.message })
+}
+
 exports.get = async (req, res) => {
   try {
     const { data, meta } = await seatService.getSeat(req?.validated?.query)
-    return successResponse(res, { message: 'success get seat', data, meta })
+    return successResponse(res, { message: 'Success get seats', data, meta })
   } catch (error) {
     return errorResponse(res, { message: error?.message })
   }
@@ -16,21 +34,7 @@ exports.create = async (req, res) => {
 
     return successResponse(res, { message: 'Success create seat', data: result })
   } catch (error) {
-    if (error?.code === 'P2002') {
-      return errorResponse(res, {
-        message: 'Seat number already exists in this studio',
-        code: 409
-      })
-    }
-
-    if (error?.code === 'P2003') {
-      return errorResponse(res, {
-        message: 'Studio not found',
-        code: 404
-      })
-    }
-
-    return errorResponse(res, { message: error?.message })
+    return handleSeatError(res, error)
   }
 }
 
@@ -70,19 +74,7 @@ exports.update = async (req, res) => {
       data
     })
   } catch (error) {
-    if (error?.code === 'P2002') {
-      return errorResponse(res, {
-        message: 'Seat number already exists in this studio',
-        code: 409
-      })
-    }
-    if (error?.code === 'P2003') {
-      return errorResponse(res, {
-        message: 'Studio not found',
-        code: 404
-      })
-    }
-    return errorResponse(res, { message: error?.message })
+    return handleSeatError(res, error)
   }
 }
 

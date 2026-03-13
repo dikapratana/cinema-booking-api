@@ -31,6 +31,27 @@ function getConflictMessage(error) {
   return null
 }
 
+function handleShowtimeError(res, error) {
+  const foreignKeyMessage = getForeignKeyMessage(error)
+  const conflictMessage = getConflictMessage(error)
+
+  if (foreignKeyMessage) {
+    return errorResponse(res, {
+      message: foreignKeyMessage,
+      code: 404
+    })
+  }
+
+  if (conflictMessage) {
+    return errorResponse(res, {
+      message: conflictMessage,
+      code: 409
+    })
+  }
+
+  return errorResponse(res, { message: error?.message })
+}
+
 exports.get = async (req, res) => {
   try {
     const { data, meta } = await showTimeService.getShowTime(req?.validated?.query)
@@ -45,24 +66,7 @@ exports.create = async (req, res) => {
     const data = await showTimeService.createShowTime(req?.validated?.body)
     return successResponse(res, { message: 'Success create showtime', data })
   } catch (error) {
-    const foreignKeyMessage = getForeignKeyMessage(error)
-    const conflictMessage = getConflictMessage(error)
-
-    if (foreignKeyMessage) {
-      return errorResponse(res, {
-        message: foreignKeyMessage,
-        code: 404
-      })
-    }
-
-    if (conflictMessage) {
-      return errorResponse(res, {
-        message: conflictMessage,
-        code: 409
-      })
-    }
-
-    return errorResponse(res, { message: error?.message })
+    return handleShowtimeError(res, error)
   }
 }
 
@@ -102,24 +106,7 @@ exports.update = async (req, res) => {
       data
     })
   } catch (error) {
-    const foreignKeyMessage = getForeignKeyMessage(error)
-    const conflictMessage = getConflictMessage(error)
-
-    if (foreignKeyMessage) {
-      return errorResponse(res, {
-        message: foreignKeyMessage,
-        code: 404
-      })
-    }
-
-    if (conflictMessage) {
-      return errorResponse(res, {
-        message: conflictMessage,
-        code: 409
-      })
-    }
-
-    return errorResponse(res, { message: error?.message })
+    return handleShowtimeError(res, error)
   }
 }
 

@@ -20,58 +20,59 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (minutes * 60 * 1000))
 }
 
-async function getShowTime(query) {
-  return paginateQuery(prisma.showtime, {
-    ...query,
-    orderBy: { createdAt: 'desc' }
-  })
-}
-
-async function createShowTime(data) {
+async function getMovieAndStudio({ movieId, studioId }) {
   const [movie, studio] = await Promise.all([
-    prisma.movie.findUnique({
-      where: {
-        id: data.movieId
-      },
-      select: {
-        id: true,
-        duration: true
-      }
-    }),
-    prisma.studio.findUnique({
-      where: {
-        id: data.studioId
-      },
-      select: {
-        id: true
-      }
-    })
+    movieId
+      ? prisma.movie.findUnique({
+        where: {
+          id: movieId
+        },
+        select: {
+          id: true,
+          duration: true
+        }
+      })
+      : null,
+    studioId
+      ? prisma.studio.findUnique({
+        where: {
+          id: studioId
+        },
+        select: {
+          id: true
+        }
+      })
+      : null
   ])
 
-  if (!movie) {
+  if (movieId && !movie) {
     throw createRelationNotFoundError('movieId', 'Movie not found')
   }
 
-  if (!studio) {
+  if (studioId && !studio) {
     throw createRelationNotFoundError('studioId', 'Studio not found')
   }
 
-  const endTime = addMinutes(data.startTime, movie.duration)
+  return {
+    movie,
+    studio
+  }
+}
 
+async function ensureNoOverlappingShowtime({ studioId, startTime, endTime, excludeId }) {
   const existingShowtime = await prisma.showtime.findFirst({
     where: {
-      studioId: data.studioId,
+      studioId,
+      id: excludeId ? { not: excludeId } : undefined,
       startTime: {
         lt: endTime
       },
       endTime: {
-        gt: data.startTime
+        gt: startTime
       }
     },
     select: {
-      id: true,
-      startTime: true,
-      endTime: true
+      id: true
     }
   })
 
@@ -81,6 +82,25 @@ async function createShowTime(data) {
       'Another showtime overlaps this studio schedule'
     )
   }
+}
+
+async function getShowTime(query) {
+  return paginateQuery(prisma.showtime, {
+    ...query,
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
+async function createShowTime(data) {
+  const { movie } = await getMovieAndStudio(data)
+
+  const endTime = addMinutes(data.startTime, movie.duration)
+
+  await ensureNoOverlappingShowtime({
+    studioId: data.studioId,
+    startTime: data.startTime,
+    endTime
+  })
 
   return await prisma.showtime.create({
     data: {
@@ -124,13 +144,17 @@ async function detailShowTime(params) {
     }
   })
 
-  const mapResult = {
-    ...result,
-    cinema: result.studio.cinema
+  if (!result) {
+    return null
   }
-  delete result.studio.cinema
 
-  return mapResult
+  const { cinema, ...studio } = result.studio
+
+  return {
+    ...result,
+    studio,
+    cinema
+  }
 }
 
 async function updateShowTime(params, data) {
@@ -150,11 +174,32 @@ async function updateShowTime(params, data) {
     return result
   }
 
+  const nextMovieId = payload.movieId ?? result.movieId
+  const nextStudioId = payload.studioId ?? result.studioId
+  const nextStartTime = payload.startTime ?? result.startTime
+
+  const { movie } = await getMovieAndStudio({
+    movieId: nextMovieId,
+    studioId: nextStudioId
+  })
+
+  const nextEndTime = addMinutes(nextStartTime, movie.duration)
+
+  await ensureNoOverlappingShowtime({
+    studioId: nextStudioId,
+    startTime: nextStartTime,
+    endTime: nextEndTime,
+    excludeId: params?.id
+  })
+
   const update = await prisma.showtime.update({
     where: {
       id: params?.id
     },
-    data: payload
+    data: {
+      ...payload,
+      endTime: nextEndTime
+    }
   })
 
   return update

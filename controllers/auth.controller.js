@@ -4,28 +4,70 @@ const jwt = require('jsonwebtoken')
 const authService = require('../services/auth.service')
 const { errorResponse, successResponse } = require('../utils/response')
 const { JWT_SECRET } = require('../constants/env')
-const prisma = require('../config/prisma')
+
+function createAccessToken(user) {
+  return jwt.sign(
+    {
+      userId: user.id,
+      role: user.role
+    },
+    JWT_SECRET,
+    { expiresIn: '1d' }
+  )
+}
+
+function handleInjectAdminError(res, error) {
+  if (error?.code === 'ADMIN_ALREADY_EXISTS') {
+    return errorResponse(res, {
+      message: error.message,
+      code: 409
+    })
+  }
+
+  if (error?.code === 'P2002') {
+    const target = String(error?.meta?.target || '')
+
+    if (target.includes('User_email_key') || target.includes('email')) {
+      return errorResponse(res, {
+        message: 'Email already exists',
+        code: 409
+      })
+    }
+
+    if (target.includes('single_admin') || target.includes('role')) {
+      return errorResponse(res, {
+        message: 'Admin already exists',
+        code: 409
+      })
+    }
+  }
+
+  return errorResponse(res, {
+    message: 'Internal server error',
+    code: 500
+  })
+}
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.validatedData
 
     const user = await authService.findUserByEmail(email)
+
     if (!user) {
       return errorResponse(res, { message: 'Invalid email or password', code: 401 })
     }
-    const isWatch = await bcrypt.compare(password, user.password)
 
-    if (!isWatch) {
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+
+    if (!isPasswordValid) {
       return errorResponse(res, {
-        message: 'Invalid email or password', code: 401
+        message: 'Invalid email or password',
+        code: 401
       })
     }
 
-    const token = jwt.sign({
-      userId: user.id,
-      role: user.role
-    }, JWT_SECRET, { expiresIn: '1d' })
+    const token = createAccessToken(user)
 
     return successResponse(res, {
       message: 'Login success',
@@ -44,29 +86,12 @@ exports.injectAdmin = async (req, res) => {
   try {
     const { name, email, password } = req.validatedData
 
-    // cek apakah sudah ada admin
-    const adminExist = await prisma.user.findFirst({
-      where: {
-        role: 'ADMIN'
-      }
-    })
-
-    if (adminExist) {
-      return errorResponse(res, {
-        message: 'Admin already exists',
-        code: 409
-      })
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    const admin = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: 'ADMIN'
-      }
+    const admin = await authService.createAdmin({
+      name,
+      email,
+      password: hashedPassword
     })
 
     return successResponse(res, {
@@ -79,11 +104,6 @@ exports.injectAdmin = async (req, res) => {
       code: 201
     })
   } catch (error) {
-    console.error('inject admin error:', error)
-
-    return errorResponse(res, {
-      message: 'Internal server error',
-      code: 500
-    })
+    return handleInjectAdminError(res, error)
   }
 }
