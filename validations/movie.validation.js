@@ -13,7 +13,8 @@ const createMovieSchema = z.object({
   description: requiredTrimmedString('description'),
   duration: integerFromString('duration'),
   posterUrl: requiredTrimmedString('posterUrl')
-    .regex(/^\/uploads\/.+$/, 'posterUrl is invalid')
+    .regex(/^\/uploads\/.+$/, 'posterUrl is invalid'),
+  genreId: requiredTrimmedString('genreId')
 }).strict()
 
 const movieIdParamSchema = idParamSchema

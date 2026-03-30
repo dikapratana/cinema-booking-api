@@ -25,24 +25,28 @@ model Cinema {
 }
 
 model Studio {
-  id        String   @id @default(uuid())
-  name      String
-  cinema    Cinema   @relation(fields: [cinemaId], references: [id])
-  cinemaId  String
-  seats     Seat[]
+  id          String     @id @default(uuid())
+  name        String
+  cinema      Cinema     @relation(fields: [cinemaId], references: [id])
+  cinemaId    String
+  seats       Seat[]
+  seatRows    String[]
+  seatsPerRow Int?
   showtimes Showtime[]
-  createdAt DateTime @default(now())
+  createdAt   DateTime   @default(now())
 
   @@unique([cinemaId, name])
 }
 
 model Seat {
-  id        String   @id @default(uuid())
-  number    String   // contoh: A1, A2
-  studio    Studio   @relation(fields: [studioId], references: [id])
-  studioId  String
-  bookings  BookingSeat[]
-  createdAt DateTime @default(now())
+  id           String        @id @default(uuid())
+  number       String        // contoh: A1
+  rowLabel     String
+  columnNumber Int
+  studio       Studio        @relation(fields: [studioId], references: [id])
+  studioId     String
+  bookings     BookingSeat[]
+  createdAt    DateTime      @default(now())
 
   @@unique([studioId, number])
 }

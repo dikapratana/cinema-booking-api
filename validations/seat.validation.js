@@ -1,18 +1,12 @@
-const { z, paginationSchema, requiredTrimmedString, idParamSchema } = require('./helpers')
+const { paginationSchema, requiredTrimmedString, idParamSchema } = require('./helpers')
 
-const getSeatSchema = paginationSchema
-
-const createSeatSchema = z.object({
-  number: requiredTrimmedString('number'),
-  studioId: requiredTrimmedString('studioId')
+const getSeatSchema = paginationSchema.extend({
+  studioId: requiredTrimmedString('studioId').optional()
 }).strict()
 
-const updateSeatSchema = createSeatSchema.partial()
 const seatIdParamSchema = idParamSchema
 
 module.exports = {
   getSeatSchema,
-  createSeatSchema,
-  updateSeatSchema,
   seatIdParamSchema
 }

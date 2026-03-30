@@ -14,26 +14,11 @@ router.get(
   seatController.get
 )
 
-router.post('/', jwtAuth, validationMiddleware(seatValidation.createSeatSchema), seatController.create)
-
 router.get(
   '/:id',
   jwtAuth,
   validationMiddleware(seatValidation.seatIdParamSchema, 'params'),
   seatController.detail
-)
-
-router.put(
-  '/:id',
-  jwtAuth,
-  validationMiddleware(seatValidation.seatIdParamSchema, 'params'),
-  validationMiddleware(seatValidation.updateSeatSchema), seatController.update)
-
-router.delete(
-  '/:id',
-  jwtAuth,
-  validationMiddleware(seatValidation.seatIdParamSchema, 'params'),
-  seatController.delete
 )
 
 module.exports = router

@@ -1,14 +1,19 @@
 const prisma = require('../config/prisma')
 const paginateQuery = require('../utils/paginateQuery')
-const { buildUpdatePayload, isEmptyPayload } = require('../utils/updatePayload')
 
 async function getSeat(query) {
   return paginateQuery(prisma.seat, {
-    ...query,
+    page: query.page,
+    size: query.size,
+    where: {
+      studioId: query.studioId
+    },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
       number: true,
+      rowLabel: true,
+      columnNumber: true,
       studio: {
         select: {
           id: true,
@@ -19,69 +24,27 @@ async function getSeat(query) {
   })
 }
 
-async function createSeat(data) {
-  return await prisma.seat.create({ data })
-}
-
 async function detailSeat(params) {
   return await prisma.seat.findUnique({
     where: {
       id: params?.id
-    }
-  })
-}
-
-async function updateSeat(params, data) {
-  const result = await prisma.seat.findUnique({
-    where: {
-      id: params?.id
-    }
-  })
-
-  if (!result) {
-    return null
-  }
-
-  const payload = buildUpdatePayload(data)
-
-  if (isEmptyPayload(payload)) {
-    return result
-  }
-
-  const update = await prisma.seat.update({
-    where: {
-      id: params?.id
     },
-    data: payload
-  })
-
-  return update
-}
-
-async function deleteSeat(params) {
-  const result = await prisma.seat.findUnique({
-    where: {
-      id: params?.id
+    select: {
+      id: true,
+      number: true,
+      rowLabel: true,
+      columnNumber: true,
+      studio: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
     }
   })
-
-  if (!result) {
-    return null
-  }
-
-  await prisma.seat.delete({
-    where: {
-      id: params?.id
-    }
-  })
-
-  return result
 }
 
 module.exports = {
   getSeat,
-  createSeat,
-  updateSeat,
-  detailSeat,
-  deleteSeat
+  detailSeat
 }

@@ -17,6 +17,17 @@ const normalizeMoviePoster = (req, movie) => ({
   posterUrl: withHostname(req, movie.posterUrl)
 })
 
+function handleStudioError(res, error) {
+  if (error?.code === 'P2003') {
+    return errorResponse(res, {
+      message: 'Genre not found',
+      code: 404
+    })
+  }
+
+  return errorResponse(res, { message: error?.message })
+}
+
 exports.findAll = async (req, res) => {
   try {
     const { data, meta } = await movieService.getAllMovies(req.validated?.query)
@@ -42,10 +53,7 @@ exports.create = async (req, res) => {
       data: normalizeMoviePoster(req, movie)
     })
   } catch (error) {
-    return errorResponse(res, {
-      message: error?.message || 'Internal server error',
-      code: 500
-    })
+    return handleStudioError(res, error)
   }
 }
 
@@ -84,10 +92,7 @@ exports.update = async (req, res) => {
       data: normalizeMoviePoster(req, movie)
     })
   } catch (error) {
-    return errorResponse(res, {
-      message: error?.message || 'Internal server error',
-      code: 500
-    })
+    return handleStudioError(res, error)
   }
 }
 

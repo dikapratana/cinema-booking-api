@@ -31,6 +31,8 @@ CREATE TABLE "Studio" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "cinemaId" TEXT NOT NULL,
+    "seatRows" TEXT[],
+    "seatsPerRow" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Studio_pkey" PRIMARY KEY ("id")
@@ -40,10 +42,20 @@ CREATE TABLE "Studio" (
 CREATE TABLE "Seat" (
     "id" TEXT NOT NULL,
     "number" TEXT NOT NULL,
+    "rowLabel" TEXT,
+    "columnNumber" INTEGER,
     "studioId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Seat_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Genre" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+
+    CONSTRAINT "Genre_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -53,6 +65,7 @@ CREATE TABLE "Movie" (
     "description" TEXT NOT NULL,
     "duration" INTEGER NOT NULL,
     "posterUrl" TEXT,
+    "genreId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Movie_pkey" PRIMARY KEY ("id")
@@ -63,7 +76,9 @@ CREATE TABLE "Showtime" (
     "id" TEXT NOT NULL,
     "movieId" TEXT NOT NULL,
     "studioId" TEXT NOT NULL,
+    "price" DECIMAL(65,30) NOT NULL,
     "startTime" TIMESTAMP(3) NOT NULL,
+    "endTime" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Showtime_pkey" PRIMARY KEY ("id")
@@ -96,6 +111,9 @@ CREATE TABLE "BookingSeat" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Studio_cinemaId_name_key" ON "Studio"("cinemaId", "name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Seat_studioId_number_key" ON "Seat"("studioId", "number");
 
 -- CreateIndex
@@ -106,6 +124,9 @@ ALTER TABLE "Studio" ADD CONSTRAINT "Studio_cinemaId_fkey" FOREIGN KEY ("cinemaI
 
 -- AddForeignKey
 ALTER TABLE "Seat" ADD CONSTRAINT "Seat_studioId_fkey" FOREIGN KEY ("studioId") REFERENCES "Studio"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Movie" ADD CONSTRAINT "Movie_genreId_fkey" FOREIGN KEY ("genreId") REFERENCES "Genre"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Showtime" ADD CONSTRAINT "Showtime_movieId_fkey" FOREIGN KEY ("movieId") REFERENCES "Movie"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -16,6 +16,13 @@ function handleStudioError(res, error) {
     })
   }
 
+  if (error?.code === 'STUDIO_LAYOUT_CONFLICT') {
+    return errorResponse(res, {
+      message: error.message,
+      code: 409
+    })
+  }
+
   return errorResponse(res, { message: error?.message })
 }
 
@@ -94,5 +101,29 @@ exports.delete = async (req, res) => {
     })
   } catch (error) {
     return errorResponse(res, { message: error?.message })
+  }
+}
+
+exports.generateSeats = async (req, res) => {
+  try {
+    const data = await studioService.generateStudioSeats(
+      req?.validated?.params,
+      req?.validated?.body
+    )
+
+    if (!data) {
+      return errorResponse(res, {
+        message: 'Studio not found',
+        code: 404
+      })
+    }
+
+    return successResponse(res, {
+      message: 'Success generate studio seats',
+      data,
+      code: 201
+    })
+  } catch (error) {
+    return handleStudioError(res, error)
   }
 }

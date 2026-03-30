@@ -16,6 +16,14 @@ router.get(
 
 router.post('/', jwtAuth, validationMiddleware(studioValidation.createStudioSchema), studioController.create)
 
+router.post(
+  '/:id/seats/generate',
+  jwtAuth,
+  validationMiddleware(studioValidation.studioIdParamSchema, 'params'),
+  validationMiddleware(studioValidation.generateStudioSeatsSchema),
+  studioController.generateSeats
+)
+
 router.get(
   '/:id',
   jwtAuth,
